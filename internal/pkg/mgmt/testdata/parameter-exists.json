@@ -1,0 +1,71 @@
+{
+  "Policy": {
+    "GetParameters": {
+      "limit": 20,
+      "offset": 0,
+      "total": 1,
+      "rows": [
+        {
+          "name": "$$$_tuningService_DUT",
+          "comment": "",
+          "id": "123456",
+          "$parameterType": "Overrides",
+          "overrides": [
+            {
+              "behavior": [
+                {
+                  "action": "accept"
+                }
+              ],
+              "match": {
+                "sourceidentifier": "127.0.0.3"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "Put": {
+      "name": "$$$_tuningService_DUT",
+      "comment": "",
+      "id": "123456",
+      "$parameterType": "Overrides",
+      "overrides": [
+        {
+          "behavior": [
+            {
+              "action": "accept"
+            }
+          ],
+          "match": {
+            "sourceidentifier": "127.0.0.3"
+          }
+        },
+        {
+          "behavior": [
+            {
+              "action": "accept"
+            }
+          ],
+          "match": {
+            "sourceidentifier": "127.0.0.1"
+          }
+        }
+      ]
+    }
+  },
+  "Asset": {
+    "Get": {
+      "$id": "asset_v1",
+      "name": "DUT",
+      "comment": "",
+      "category": "cloud",
+      "class": "workload",
+      "parameters": [],
+      "family": "webApplication",
+      "applicationUrls": [
+        "http://172.28.13.13"
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "Policy": {
+    "GetParameter": {
+      "name": "$$$_tuningService_a",
+      "comment": "",
+      "id": "123456",
+      "$parameterType": "Overrides",
+      "overrides": [
+        {
+          "behavior": [
+            {
+              "action": "accept"
+            }
+          ],
+          "match": {
+            "sourceidentifier": "127.0.0.1"
+          }
+        },
+        {
+          "behavior": [
+            {
+              "action": "accept"
+            }
+          ],
+          "match": {
+            "sourceidentifier": "127.0.0.3"
+          }
+        }
+      ]
+    },
+    "Put": {
+      "name": "$$$_tuningService_a",
+      "comment": "",
+      "id": "123456",
+      "$parameterType": "Overrides",
+      "overrides": [
+        {
+          "behavior": [
+            {
+              "action": "accept"
+            }
+          ],
+          "match": {
+            "sourceidentifier": "127.0.0.3"
+          }
+        },
+        {
+          "behavior": [
+            {
+              "action": "reject"
+            }
+          ],
+          "match": {
+            "sourceidentifier": "127.0.0.1"
+          }
+        }
+      ]
+    }
+  }
+}

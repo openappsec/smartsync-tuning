@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fog-msrv-waap-tuning-process-deployment
+  labels:
+    app: fog-msrv-waap-tuning-process-lbl
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: fog-msrv-waap-tuning-process-lbl
+  template:
+    metadata:
+      labels:
+        app: fog-msrv-waap-tuning-process-lbl
+        group: fog-core
+    spec:
+      containers:
+        - name:  fog-msrv-waap-tuning-processing
+          imagePullPolicy: Always
+          image: 342930366839.dkr.ecr.eu-west-1.amazonaws.com/fog-msrv-waap-tuning-processing:{{ .Values.image_tag }}
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 10
+          env:
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: DATATUBE_WAAP_DATASET_ID
+              valueFrom:
+                secretKeyRef:
+                  name: fog-msrv-waap-tuning-process-secret
+                  key: DATATUBE_WAAP_DATASET_ID
+            - name: DATATUBE_SERVICE_ACCOUNT_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: fog-msrv-waap-tuning-process-secret
+                  key: DATATUBE_SERVICE_ACCOUNT_JSON
+            - name: ELPIS_LOGS_TENANT
+              value: {{ .Values.mainElpisLogsTenant }}
+            - name: KAFKA_CONSUMER_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: general-external-datasources-configmap
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CONSUMER_REVOKEAGENT_TOPIC
+              value: $(K8S_NAMESPACE)_fog.gem.agentRevoke
+            - name: KAFKA_CONSUMER_REVOKEAGENT_GROUPID
+              value: $(K8S_NAMESPACE)_fog.agentRevoke.msrv.tuning.svc
+            - name: REDIS_ADDRESS
+              value: fog-redis-ha:26379
+            - name: TENANTS_LIST
+              value: {{ .Values.tenantsForTuningServiceLogsFlag }}
+            - name: TRACER_HOST
+              value: jaeger-agent
+            - name: TRACER_PORT
+              value: '6831'
+            - name: TRACER_SAMPLE_RATE
+              value: '1.0'
+            - name: TRACER_ENABLED
+              value: 'false'
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: fog-msrv-agents-tuning-process-configmap
+                  key: S3_ARTIFACT_REPO_BUCKET
+            - name: S3_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: fog-msrv-agents-tuning-process-configmap
+                  key: S3_REGION
+            - name: AWS_ACCESS_KEY_ID
+              value: {{ .Values.global.aws_id_s3_iam }}
+            - name: AWS_SECRET_ACCESS_KEY
+              value: {{ .Values.global.aws_secret_s3_iam }}
+            - name: AES_ENCRYPTION_KEY
+              value: {{ .Values.tuningEncryptionKey }}
+            - name: AES_ENCRYPTION_IV
+              value: {{ .Values.tuningEncryptionIV }}
+            - name: ENCRYPTION_OBFUSCATE
+              value: {{ .Values.tuningObfuscation }}
+            - name: MONGO_DATABASE
+              value: $(K8S_NAMESPACE)_tuning-db
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: external-services-secret
+                  key: MONGO_URI

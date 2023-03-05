@@ -1,0 +1,4 @@
+# Add folder names to NOT run golint under below
+/mocks
+/internal/app/ingector
+EOF-do-not-delete

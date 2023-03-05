@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fog-msrv-agents-tuning-process-configmap
+data:
+  S3_ARTIFACT_REPO_BUCKET: {{ .Values.versionMapBucket }}
+  # used to be dev-${ENV_NAME}-artifacts-repository-mock in dev, and now will be ${ENV_NAME}-artifacts-repository-mock in dev and staging
+  S3_REGION: {{ .Values.awsRegion }}
