@@ -13,10 +13,10 @@ WORKDIR /app
 COPY . .
 
 # update path to dependencies.
-ENV GOMODCACHE /vendor
+ENV GOMODCACHE /dependencies
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /go/bin/app ./cmd/server/
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -mod=readonly -a -installsuffix cgo -o /go/bin/app ./cmd/server/
 
 ############################
 # STEP 2 build a small image

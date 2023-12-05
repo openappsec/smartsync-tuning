@@ -54,7 +54,6 @@ type Adapter struct {
 	tuningFileName string
 	policyFileName string
 	policiesPath   string
-	encryptor      *encryptor
 }
 
 // NewAdapter creates new adapter
@@ -83,12 +82,6 @@ func (a *Adapter) initialize() error {
 	a.policiesPath = policyPath
 
 	a.HTTPClient = client.NewTracerClient(traceClientTimeout)
-
-	enc, err := newEncryptor(a.conf)
-	if err != nil {
-		return errors.Wrap(err, "Unable to configure encryptor")
-	}
-	a.encryptor = enc
 
 	return nil
 }
@@ -221,28 +214,17 @@ func (a *Adapter) getFileRaw(ctx context.Context, tenantID string, path string, 
 		return models.S3File{[]byte{}, false, false}, errors.Errorf("got empty file: %v", path)
 	}
 
-	var isEncrypted bool
 	var isCompressed bool
 	var decompressed []byte
-	resDec, errEnc := a.encryptor.decrypt(resp)
-	if errEnc == nil {
-		isEncrypted = true
-		if replaceNaN {
-			resDec = bytes.Replace(resDec, []byte("NaN"), []byte("-100"), -1)
-		}
-		decompressed, isCompressed, err = a.decompressIfNeeded(ctx, resDec)
-	} else {
-		isEncrypted = false
-		if replaceNaN {
-			resp = bytes.Replace(resp, []byte("NaN"), []byte("-100"), -1)
-		}
-		decompressed, isCompressed, err = a.decompressIfNeeded(ctx, resp)
+	if replaceNaN {
+		resp = bytes.Replace(resp, []byte("NaN"), []byte("-100"), -1)
 	}
+	decompressed, isCompressed, err = a.decompressIfNeeded(ctx, resp)
 
 	if err == nil {
-		log.WithContext(ctx).Debugf("got file: %v (compression: %v encryption: %v)", path, isCompressed, isEncrypted)
+		log.WithContext(ctx).Debugf("got file: %v (compression: %v)", path, isCompressed)
 	}
-	return models.S3File{decompressed, isCompressed, isEncrypted}, err
+	return models.S3File{decompressed, isCompressed, false}, err
 }
 
 // GetDecisions returns tuning decisions for a specific tenantID and assetID from s3 repository
@@ -279,14 +261,8 @@ func (a *Adapter) postFile(ctx context.Context, tenantID string, path string, en
 	}
 
 	requestByte, _ := json.Marshal(data)
-	var resBytes []byte
-	if encrypt {
-		resBytes = a.encryptor.encrypt(requestByte)
-	} else {
-		resBytes = requestByte
-	}
 
-	requestReader := bytes.NewReader(resBytes)
+	requestReader := bytes.NewReader(requestByte)
 
 	req, err := http.NewRequest(http.MethodPut, path, requestReader)
 	if err != nil {

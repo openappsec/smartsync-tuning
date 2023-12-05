@@ -28,6 +28,7 @@ require (
 	openappsec.io/jsonschema v0.5.0
 	openappsec.io/kafka v0.11.0
 	openappsec.io/log v0.10.0
+
 	openappsec.io/mongodb v0.31.1
 	openappsec.io/redis v0.25.1
 	openappsec.io/tracer v0.6.0
