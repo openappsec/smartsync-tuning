@@ -1,0 +1,67 @@
+{{- if and (eq "standalone" .Values.appsec.mode) (eq .Values.appsec.playground false) .Values.appsec.tuning.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appsec.tuning.name }}-deployment
+  labels:
+    app: {{ .Values.appsec.tuning.name }}-lbl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.appsec.tuning.name }}-lbl
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appsec.tuning.name }}-lbl
+        group: fog-core
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 2000
+        runAsUser: 1000
+      serviceAccountName: tuning-svc-account
+      containers:
+        - name:  {{ .Values.appsec.tuning.name }}
+          imagePullPolicy: Always
+          image: vitalycp.azurecr.io/tuning:latest
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 10
+          env:
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MODE
+              value: "stand-alone"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "common.names.fullname" .Subcharts.postgresql }}
+                  key: {{ include "postgresql.adminPasswordKey" .Subcharts.postgresql }}
+            - name: QUERY_DB_NAME_FMT
+              value: "postgres://postgres:%s@{{ include "postgresql.primary.fullname" .Subcharts.postgresql }}:5432/i2datatubeschemasecurityeventlogsv03?sslmode=disable"
+            - name: QUERY_DB_ROOT_FMT
+              value: "postgres://postgres:%s@{{ include "postgresql.primary.fullname" .Subcharts.postgresql }}:5432/?sslmode=disable"
+            - name: RP_BASEURL
+              value: http://{{ .Values.appsec.storage.name }}-svc/api
+{{- end }}

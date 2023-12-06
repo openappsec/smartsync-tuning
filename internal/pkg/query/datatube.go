@@ -13,10 +13,10 @@ import (
 
 	"openappsec.io/fog-msrv-waap-tuning-process/models"
 
-	"openappsec.io/errors"
-	"openappsec.io/log"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/iterator"
+	"openappsec.io/errors"
+	"openappsec.io/log"
 )
 
 const (
@@ -25,10 +25,11 @@ const (
 	confKeyQuery                         = "query"
 	confKeyQueryDurationWarningThreshold = confKeyQuery + ".warningThreshold"
 	confKeyQueryDB                       = confKeyQuery + ".db"
-	confKeyQueryDBName                   = confKeyQueryDB + ".name"
-	confKeyQueryDBRoot                   = confKeyQueryDB + ".root"
+	confKeyQueryDBNameFmt                = confKeyQueryDB + ".name_fmt"
+	confKeyQueryDBRootFmt                = confKeyQueryDB + ".root_fmt"
 
-	maxRetries = 3
+	confKeyQueryDBPass = "db.password"
+	maxRetries         = 3
 )
 
 // Field names for smartview queries
@@ -93,10 +94,21 @@ type Configuration interface {
 
 // NewAdapter creates an empty new adapter
 func NewAdapter(ctx context.Context, c Configuration, g GenQueries, driver driver.Driver) (*Adapter, error) {
-	dbName, err := c.GetString(confKeyQueryDBName)
+	dbName, err := c.GetString(confKeyQueryDBNameFmt)
 	if err != nil {
 		return nil, err
 	}
+
+	pass, err := c.GetString(confKeyQueryDBPass)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(pass) > 0 {
+		dbName = fmt.Sprintf(dbName, pass)
+	}
+
+	log.WithContext(ctx).Infof("db name: %s", dbName)
 
 	a := &Adapter{config: c, tenantsLock: &sync.Mutex{}, genQuery: g, driver: driver, dbName: dbName}
 	return a, nil
@@ -712,7 +724,7 @@ func (qa *Adapter) InsertLog(ctx context.Context, message *models.AgentMessage) 
 	if err != nil {
 		return errors.Wrap(err, "failed to generate insert statement")
 	}
-	log.WithContext(ctx).Infof("insert statement: %v", stmtStr)
+	log.WithContext(ctx).Infof("insert statement: %v, db name: %s", stmtStr, qa.dbName)
 	conn, err := qa.driver.Open(qa.dbName)
 	if err != nil {
 		errCreateDB := qa.createDB(ctx)
@@ -814,9 +826,18 @@ func (qa *Adapter) createTable(ctx context.Context, conn driver.Conn, message *m
 func (qa *Adapter) createDB(ctx context.Context) error {
 	stmt := qa.genQuery.CreateDatabase()
 
-	rootConn, err := qa.config.GetString(confKeyQueryDBRoot)
+	pass, err := qa.config.GetString(confKeyQueryDBPass)
+	if err != nil {
+		return err
+	}
+
+	rootConn, err := qa.config.GetString(confKeyQueryDBRootFmt)
 	if err != nil {
 		return errors.Wrap(err, "failed to get root connection path")
+	}
+
+	if len(pass) > 0 {
+		rootConn = fmt.Sprintf(rootConn, pass)
 	}
 
 	conn, err := qa.driver.Open(rootConn)
