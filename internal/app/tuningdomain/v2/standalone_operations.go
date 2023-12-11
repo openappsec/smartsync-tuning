@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
 	"openappsec.io/ctxutils"
 	"openappsec.io/errors"
+	"openappsec.io/fog-msrv-waap-tuning-process/models"
 	"openappsec.io/log"
 )
 

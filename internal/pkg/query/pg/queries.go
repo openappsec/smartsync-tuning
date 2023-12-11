@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
 	"openappsec.io/errors"
+	"openappsec.io/fog-msrv-waap-tuning-process/models"
 	"openappsec.io/log"
 )
 
@@ -444,10 +444,10 @@ func (qg *QueriesGen) extractColNameAndValue(value reflect.Value) ([]string, []d
 //GenerateLogQuery created a log query for psql
 func (qg *QueriesGen) GenerateLogQuery(data models.TuneEvent, assetName string) string {
 	queryFieldsMap := map[string]string{
-		models.EventTypeSource:    fieldNameSource,
-		models.EventTypeURL:       fieldNameURL,
-		models.EventTypeParamName: fieldNameParamName,
-		models.EventTypeParamVal:  fieldNameParamValue,
+		models.EventTypeSource:                     fieldNameSource,
+		models.EventTypeURL:                        fieldNameURL,
+		strings.ToLower(models.EventTypeParamName): fieldNameParamName,
+		strings.ToLower(models.EventTypeParamVal):  fieldNameParamValue,
 	}
 	querySelection := map[string]string{
 		"eventTime":           "Event Time",
@@ -498,7 +498,8 @@ func (qg *QueriesGen) GenerateLogQuery(data models.TuneEvent, assetName string) 
 		queryCondition = append(queryCondition, fmt.Sprintf("%v='%v'", models.FieldNameAssetID, assetName))
 	}
 	queryCondition = append(queryCondition, "eventtime::timestamp >= CURRENT_TIMESTAMP - interval '7 days'")
-	queryCondition = append(queryCondition, fmt.Sprintf("%v='%v'", queryFieldsMap[data.EventType], data.EventTitle))
+	queryCondition = append(queryCondition, fmt.Sprintf("%v='%v'", queryFieldsMap[strings.ToLower(data.EventType)],
+		data.EventTitle))
 	return query + strings.Join(queryCondition, " and ")
 }
 
