@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/internal/app/ingector"
+	"openappsec.io/smartsync-tuning/internal/app/ingector"
 
 	"openappsec.io/errors/errorloader"
 	"openappsec.io/log"

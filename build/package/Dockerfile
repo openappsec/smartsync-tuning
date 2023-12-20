@@ -4,19 +4,16 @@
 # golang alpine 1.18
 FROM golang:1.18-alpine as builder
 
-# Create appuser so as not to run as root
-RUN adduser -D -g '' appuser
-
 RUN mkdir /app
 WORKDIR /app
 
 COPY . .
 
 # update path to dependencies.
-ENV GOMODCACHE /dependencies
+ENV GOMODCACHE /vendor
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -mod=readonly -a -installsuffix cgo -o /go/bin/app ./cmd/server/
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /go/bin/app ./cmd/server/
 
 ############################
 # STEP 2 build a small image
@@ -30,6 +27,8 @@ COPY --from=builder /go/bin/app /go/bin/app
 # Copy configuration files
 COPY --from=builder /app/configs/* ./configs/
 
+# Create appuser so as not to run as root
+RUN adduser -D -g '' appuser
 # Use an unprivileged user.
 USER appuser
 

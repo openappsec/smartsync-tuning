@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/ctxutils"
 	"openappsec.io/errors"
 	"openappsec.io/log"
@@ -30,7 +30,7 @@ type TuningAppService interface {
 	PostTuningEvents(ctx context.Context, tenantID, assetID, userID string, tuningEvents []models.TuneEvent) error
 }
 
-// mockgen -destination mocks/mock_crdsReader.go -package mocks -mock_names ReaderInterface=MockCrdsReader openappsec.io/fog-msrv-waap-tuning-process/internal/app/drivers/crdlistener ReaderInterface
+// mockgen -destination mocks/mock_crdsReader.go -package mocks -mock_names ReaderInterface=MockCrdsReader openappsec.io/smartsync-tuning/internal/app/drivers/crdlistener ReaderInterface
 
 // ReaderInterface defines the interface for the crd reader client
 type ReaderInterface interface {

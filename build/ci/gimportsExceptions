@@ -1,5 +1,0 @@
-# Add folder names to NOT run goimports under below
-/internal/app/ingector
-/mocks
-/vendor
-EOF-do-not-delete

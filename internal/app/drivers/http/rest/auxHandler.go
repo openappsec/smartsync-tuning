@@ -12,7 +12,7 @@ import (
 	"openappsec.io/ctxutils"
 
 	intel "openappsec.io/intelligencesdk/models"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/errors"
 	"openappsec.io/httputils/responses"
 	"openappsec.io/log"

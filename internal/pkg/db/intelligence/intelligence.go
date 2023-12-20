@@ -11,7 +11,7 @@ import (
 
 	intelModels "openappsec.io/intelligencesdk/models"
 	"openappsec.io/intelligencesdk/pkg/sdk"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/errors"
 	"openappsec.io/log"
 )

@@ -1,7 +1,0 @@
-# Add folder names to NOT run tests under below
-/mocks
-/models
-/internal/app/ingector
-/cmd
-/internal/pkg/query/bqadapter
-EOF-do-not-delete

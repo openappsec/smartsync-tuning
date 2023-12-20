@@ -10,7 +10,7 @@ import (
 	"path"
 	"time"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/errors"
 	"openappsec.io/httputils/client"
 	"openappsec.io/log"

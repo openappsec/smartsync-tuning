@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/log"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/log"
 )
 
@@ -44,7 +44,7 @@ type Configuration interface {
 }
 
 // RepositoryV2 defines the interface for storing and getting data
-// mockgen -destination mocks/mock_repositoryV2.go -package mocks -mock_names RepositoryV2=MockRepositoryV2 openappsec.io/fog-msrv-waap-tuning-process/internal/app/tuningdomain/v2 RepositoryV2
+// mockgen -destination mocks/mock_repositoryV2.go -package mocks -mock_names RepositoryV2=MockRepositoryV2 openappsec.io/smartsync-tuning/internal/app/tuningdomain/v2 RepositoryV2
 type RepositoryV2 interface {
 	ReportAsset(ctx context.Context, reportedType models.ReportedAssetType, tenant string, asset string, data interface{}) error
 	GetAssetData(ctx context.Context, reportedType models.ReportedAssetType, tenantID string, assetID string, out interface{}) error

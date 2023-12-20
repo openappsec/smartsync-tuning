@@ -9,7 +9,7 @@ import (
 
 	intel "openappsec.io/intelligencesdk/models"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"openappsec.io/errors"

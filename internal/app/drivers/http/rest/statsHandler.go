@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/ctxutils"
 	"openappsec.io/errors"
 	"openappsec.io/httputils/responses"

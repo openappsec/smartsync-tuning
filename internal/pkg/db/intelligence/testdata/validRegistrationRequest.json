@@ -1,6 +1,6 @@
 {
   "name": "appsec statistics",
-  "queryUrl": "http://fog-msrv-waap-tuning-processing",
+  "queryUrl": "http://smartsync-tuninging",
   "apiVersion": "v1",
   "communicationType": "sync",
   "dataMap": [

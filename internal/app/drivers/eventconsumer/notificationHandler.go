@@ -10,7 +10,7 @@ import (
 
 	"openappsec.io/log"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 )
 
 const (

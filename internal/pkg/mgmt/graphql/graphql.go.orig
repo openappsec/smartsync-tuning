@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/go-uuid"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 
 	"github.com/machinebox/graphql"
 	"openappsec.io/errors"

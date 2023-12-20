@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/iterator"

@@ -72,7 +72,7 @@ type DistLock interface {
 	TearDown(ctx context.Context) error
 }
 
-//mockgen -destination mocks/mock_dbAdapter.go -package mocks openappsec.io/fog-msrv-waap-tuning-process/internal/app DBAdapter
+//mockgen -destination mocks/mock_dbAdapter.go -package mocks openappsec.io/smartsync-tuning/internal/app DBAdapter
 
 // DBAdapter defines db interface
 type DBAdapter interface {

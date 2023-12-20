@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"openappsec.io/ctxutils"
 	"openappsec.io/errors"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/log"
 )
 

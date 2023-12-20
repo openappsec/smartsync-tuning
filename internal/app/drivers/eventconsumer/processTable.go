@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 
 	"openappsec.io/log"
 
@@ -34,7 +34,8 @@ func (a *Adapter) handleProcessTable(_ context.Context, body []byte, headers map
 	for _, asset := range processTenant.Assets {
 		if asset.MgmtID == "" {
 			log.WithContext(ctx).Errorf("missing MGMT ID for asset in tenant: %v", processTenant.TenantID)
-			return errors.Errorf("failed to extract asset IDs data from json: %v for tenant: %v", string(body), processTenant.TenantID)
+			return errors.Errorf("failed to extract asset IDs data from json: %v for tenant: %v", string(body),
+				processTenant.TenantID)
 		}
 	}
 

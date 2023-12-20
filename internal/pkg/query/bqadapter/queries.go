@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/bigquery"
-	"openappsec.io/fog-msrv-waap-tuning-process/models"
+	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/errors"
 	"google.golang.org/api/googleapi"
 )
