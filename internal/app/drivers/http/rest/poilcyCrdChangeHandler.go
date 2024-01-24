@@ -7,8 +7,8 @@ import (
 
 	"openappsec.io/httputils/responses"
 
-	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/log"
+	"openappsec.io/smartsync-tuning/models"
 )
 
 // UpdatePolicyByCrd updating policy from kubernetes policy

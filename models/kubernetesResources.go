@@ -7,8 +7,9 @@ import (
 
 // TrustedSourcesSpec defines the trusted sources' spec
 type TrustedSourcesSpec struct {
-	NumOfSources       int      `json:"minNumOfSources" validate:"required"`
-	SourcesIdentifiers []string `json:"sourcesIdentifiers" validate:"required" bson:"sourcesIdentifiers"`
+	Name               string   `json:"name"`
+	NumOfSources       int      `json:"minNumOfSources" validate:"required" yaml:"minNumOfSources"`
+	SourcesIdentifiers []string `json:"sourcesIdentifiers" validate:"required" bson:"sourcesIdentifiers" yaml:"sourcesIdentifiers"`
 }
 
 // TrustedSource defines the trusted sources' policy crd
@@ -21,13 +22,14 @@ type TrustedSource struct {
 
 // PracticeSpec is the practice spec's crd
 type PracticeSpec struct {
-	WebAttacks `json:"web-attacks,omitempty"`
+	Name       string
+	WebAttacks `json:"web-attacks,omitempty" yaml:"web-attacks"`
 }
 
 //WebAttacks policy for WAAP
 type WebAttacks struct {
-	OverrideMode      string `json:"override-mode,omitempty"`
-	MinimumConfidence string `json:"minimum-confidence,omitempty"`
+	OverrideMode      string `json:"override-mode,omitempty" yaml:"override-mode"`
+	MinimumConfidence string `json:"minimum-confidence,omitempty" yaml:"minimum-confidence"`
 }
 
 // Practice is the crd
@@ -40,8 +42,8 @@ type Practice struct {
 
 // PolicySpec is the policy spec's crd
 type PolicySpec struct {
-	DefaultPolicy rule   `json:"default,omitempty"`
-	SpecificRules []rule `json:"specific-rules,omitempty"`
+	DefaultPolicy rule   `json:"default,omitempty" yaml:"default"`
+	SpecificRules []rule `json:"specific-rules,omitempty" yaml:"specific-rules"`
 }
 
 // Policy is the crd
@@ -89,13 +91,13 @@ type TuningDecisionList struct {
 }
 
 type rule struct {
-	IngressRule       string   `json:"host,omitempty"`
+	IngressRule       string   `json:"host,omitempty" yaml:"host,omitempty"`
 	Mode              string   `json:"mode"`
 	Practices         []string `json:"practices,flow,omitempty"`
 	LogTriggers       []string `json:"triggers,flow,omitempty"`
 	WebResponse       string   `json:"custom-response"`
 	SourceIdentifiers string   `json:"source-identifiers"`
-	TrustedSources    string   `json:"trusted-sources"`
+	TrustedSources    string   `json:"trusted-sources" yaml:"trusted-sources"`
 	Exceptions        []string `json:"exceptions,flow"`
 }
 

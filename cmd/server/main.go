@@ -41,7 +41,12 @@ func main() {
 	var app Apps
 
 	if isStandAloneMode {
-		app, err = ingector.InitializeAppStandAlone(initCtx)
+		isK8sEnv := os.Getenv("K8S_NAMESPACE") != ""
+		if isK8sEnv {
+			app, err = ingector.InitializeAppStandAlone(initCtx)
+		} else {
+			app, err = ingector.InitializeAppStandAloneDocker(initCtx)
+		}
 	} else {
 		app, err = ingector.InitializeApp(initCtx)
 	}

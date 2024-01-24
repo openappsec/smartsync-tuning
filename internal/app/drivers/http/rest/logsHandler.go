@@ -32,8 +32,7 @@ func (a *AdapterStandAlone) HandleLog(w http.ResponseWriter, r *http.Request) {
 			msg.TenantID = msg.Log.K8sClusterID
 			msg.Log.TenantID = msg.Log.K8sClusterID
 		} else {
-			httpReturnError(ctx, w, http.StatusBadRequest, r.URL.Path, "missing tenant id")
-			return
+			msg.TenantID = "local"
 		}
 	}
 	err = a.standaloneService.HandleLog(ctx, &msg)

@@ -22,7 +22,7 @@ type Identifier struct {
 
 // TrustedSourcesPolicy defines the trusted sources policy
 type TrustedSourcesPolicy struct {
-	NumOfSources       int          `json:"numOfSources" validate:"required" bson:"numOfSources"`
+	NumOfSources       int          `json:"minNumOfSources" validate:"required" bson:"numOfSources"`
 	SourcesIdentifiers []Identifier `json:"sourcesIdentifiers" validate:"required" bson:"sourcesIdentifiers"`
 }
 

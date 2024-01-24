@@ -43,8 +43,11 @@ func (a *AdapterStandAlone) setRoutes(router *chi.Mux) *chi.Mux {
 	errorBody := createErrorBody("default-error")
 	router.Route("/api/v1/agents/events", func(r chi.Router) {
 		r.Use(middleware.Logging(errorBody))
+		r.Use(func(next http.Handler) http.Handler {
+			return middleware.HeaderToContext(next, "X-Tenant-Id", ctxutils.ContextKeyTenantID, false, "")
+		})
 		r.Use(middleware.Tracing)
-		r.Use(middleware.CorrelationID("missing correlation ID"))
+		//r.Use(middleware.CorrelationID("missing correlation ID"))
 		r.Post("/", a.HandleLog)
 		r.Post("/bulk", a.HandleLogsBulk)
 	})
@@ -63,10 +66,10 @@ func (a *AdapterStandAlone) setRoutes(router *chi.Mux) *chi.Mux {
 		r.Post("/process-table", a.TriggerTuning)
 
 	})
-	router.Route("/api", func(r chi.Router) {
+	router.Route("/api/update-policy-crd", func(r chi.Router) {
 		r.Use(middleware.Logging(errorBody))
 		r.Use(middleware.TenantID("missing tenant ID"))
-		r.Post("/update-policy-crd", a.UpdatePolicyByCrd)
+		r.Post("/", a.UpdatePolicyByCrd)
 	})
 	return router
 }

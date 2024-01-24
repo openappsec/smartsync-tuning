@@ -39,3 +39,5 @@ tuning:
     minEventsCount: 50
     minRatio: 10.0
   filename: "tuning_decisions"
+policy:
+  path: "/etc/cp/conf/local_policy.yaml"

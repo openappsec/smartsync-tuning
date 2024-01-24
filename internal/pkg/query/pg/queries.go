@@ -11,8 +11,8 @@ import (
 
 	"github.com/lib/pq"
 	"openappsec.io/errors"
-	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/log"
+	"openappsec.io/smartsync-tuning/models"
 )
 
 const (
@@ -20,7 +20,6 @@ const (
 	confKeySchemaPath = "query.schema.path"
 
 	// Field names
-	fieldNameClusterID     = "k8sClusterId"
 	fieldNameLogID         = "logindex"
 	fieldNameCountHigh     = "high_severity"
 	fieldNameCountCritical = "critical_severity"
@@ -95,14 +94,14 @@ func NewQueriesGen(configuration Configuration) (*QueriesGen, error) {
 func (qg *QueriesGen) GetTotalRequests(tenantID string) string {
 	table := qg.genTableName(tenantID)
 
-	internalQSelect := "SELECT eventtime, k8sClusterId, assetid, agentid, logindex, max(reservedngena) as reservedngena"
+	internalQSelect := "SELECT eventtime, assetid, agentid, logindex, max(reservedngena) as reservedngena"
 	internalQFrom := fmt.Sprintf("FROM %v", table)
 	internalQWhere := "WHERE LOWER(eventname)='waap telemetry' and eventtime::timestamp <= CURRENT_TIMESTAMP " +
 		"and reservedngena is not null "
-	internalQGroupBy := "GROUP BY eventtime, k8sClusterId, assetid, agentid, logindex"
+	internalQGroupBy := "GROUP BY eventtime, assetid, agentid, logindex"
 	internalQuery := fmt.Sprintf("%v %v %v %v", internalQSelect, internalQFrom, internalQWhere, internalQGroupBy)
 	queryStr := fmt.Sprintf("select '' as tenant_id, assetid, "+
-		"sum(reservedngena) as %v FROM (%v) as requests GROUP BY k8sClusterId, assetid",
+		"sum(reservedngena) as %v FROM (%v) as requests GROUP BY assetid",
 		models.FieldNameCountAll, internalQuery)
 
 	return queryStr
@@ -121,14 +120,14 @@ func (qg *QueriesGen) ScanArray(value driver.Value, arr any) error {
 func (qg *QueriesGen) GetGeneralStatsQuery(tenantID string) string {
 	table := qg.genTableName(tenantID)
 	return fmt.Sprintf(
-		"SELECT '' as "+models.FieldNameTenantID+","+models.FieldNameAssetID+","+
+		"SELECT '' as tenant_id, "+models.FieldNameAssetID+","+
 			"count(distinct "+fieldNameSource+") as number_of_sources,"+
 			"count(distinct "+fieldNameURL+") as number_of_urls,count(*) as number_of_requests,"+
 			"(EXTRACT(epoch from (max(CURRENT_TIMESTAMP - eventtime::timestamp)))/3600)::bigint as "+models.
 			FieldNameElapsedTime+" FROM %v "+
 			"WHERE eventtime::timestamp > CURRENT_TIMESTAMP - interval '7 days' "+
 			"and eventname='Web Request' and (practicesubtype='Web Application' or practicesubtype='Web API') "+
-			"GROUP BY k8sClusterId,"+models.FieldNameAssetID, table,
+			"GROUP BY "+models.FieldNameAssetID, table,
 	)
 }
 
@@ -139,7 +138,7 @@ func (qg *QueriesGen) GetElapsedTime(tenantID string) string {
 	queryStr := fmt.Sprintf("select '' as tenant_id, assetid, "+
 		"extract(epoch from min(eventtime::timestamp))::INTEGER as %v FROM %v WHERE "+
 		"LOWER(eventname)='waap telemetry' and eventtime::timestamp <= CURRENT_TIMESTAMP and reservedngena>0 "+
-		" GROUP BY k8sClusterId, assetid", models.FieldNameStartTime, table)
+		" GROUP BY assetid", models.FieldNameStartTime, table)
 
 	return queryStr
 }
@@ -148,8 +147,7 @@ func (qg *QueriesGen) GetElapsedTime(tenantID string) string {
 func (qg *QueriesGen) GetSeverityStatsQuery(tenantID string) string {
 	table := qg.genTableName(tenantID)
 
-	str := `SELECT '' as
-  ` + models.FieldNameTenantID + `,
+	str := `SELECT '' as tenant_id, 
   ` + models.FieldNameAssetID + `,
   SUM(requests) AS ` + models.FieldNameCountAll + `,
   SUM(high_severity) AS ` + fieldNameCountHigh + `,
@@ -157,7 +155,6 @@ func (qg *QueriesGen) GetSeverityStatsQuery(tenantID string) string {
 FROM (
   SELECT
     eventtime,
-    ` + fieldNameClusterID + ` as tenant_id,
     assetid,
     agentid,
     logindex,
@@ -172,12 +169,10 @@ FROM (
     AND reservedngena IS NOT NULL 
   GROUP BY
     eventtime,
-    ` + fieldNameClusterID + `,
     assetid,
     agentid,
     logindex) as telemetry
 GROUP BY
-  tenant_id,
   assetid`
 	return str
 }
@@ -225,7 +220,7 @@ func (qg *QueriesGen) GetTuneParameterQuery(parameter string, minCount int, tena
 		whereClause += "and " + fieldNameParamName + "!='' "
 	}
 
-	selectClause := "SELECT '' as " + models.FieldNameTenantID + ",A." +
+	selectClause := "SELECT '' as tenant_id, A." +
 		models.FieldNameAssetID + "," + "max(" + fieldNameAssetName + ") as " + models.FieldNameAssetName + ", " +
 		parameter + " as " + renameMap[parameter] + ", " +
 		count(fieldNameSource, models.FieldNameCountSources) + "," +
@@ -238,7 +233,6 @@ func (qg *QueriesGen) GetTuneParameterQuery(parameter string, minCount int, tena
 
 	fromClause := table + " AS A" +
 		" INNER JOIN (SELECT" +
-		"   " + fieldNameClusterID + " as tenant_id," +
 		"   assetid," +
 		"   MAX(eventtime::timestamp) AS t" +
 		" FROM" +
@@ -248,16 +242,13 @@ func (qg *QueriesGen) GetTuneParameterQuery(parameter string, minCount int, tena
 		"   AND eventname='Web Request'" +
 		"   AND (practicesubtype='Web Application' or practicesubtype='Web API') " +
 		" GROUP BY" +
-		"   " + fieldNameClusterID + "," +
 		"   assetid) AS B " +
-		" ON " +
-		" A." + fieldNameClusterID + " = B.tenant_id" +
-		" AND A.assetid = B.assetid"
+		" ON A.assetid = B.assetid"
 
 	return fmt.Sprintf(
 		selectClause+
 			" FROM %[2]v WHERE "+whereClause+
-			"GROUP BY "+fieldNameClusterID+",A."+models.FieldNameAssetID+","+
+			"GROUP BY A."+models.FieldNameAssetID+","+
 			fieldNameSeverity+",%[1]v %[3]v",
 		parameter, fromClause, havingClause,
 	)
@@ -288,7 +279,6 @@ func (qg *QueriesGen) GetTuneURLQueryFormat(minCount int, tenantID string) strin
 
 	fromClause := table + " AS A" +
 		" INNER JOIN (SELECT" +
-		"   k8sClusterId," +
 		"   assetid," +
 		"   MAX(eventtime::timestamp) AS t" +
 		" FROM" +
@@ -298,16 +288,13 @@ func (qg *QueriesGen) GetTuneURLQueryFormat(minCount int, tenantID string) strin
 		"   AND eventname='Web Request'" +
 		"   AND (practicesubtype='Web Application' or practicesubtype='Web API')" +
 		" GROUP BY" +
-		"   k8sClusterId," +
 		"   assetid) AS B " +
-		" ON" +
-		" A.k8sClusterId = B.k8sClusterId" +
-		" AND A.assetid = B.assetid"
+		" ON A.assetid = B.assetid"
 
 	return fmt.Sprintf(
 		selectClause+
 			" FROM %[2]v WHERE "+whereClause+
-			"GROUP BY A."+fieldNameClusterID+",A."+models.FieldNameAssetID+","+
+			"GROUP BY A."+models.FieldNameAssetID+","+
 			fieldNameSeverity+",%[1]v %[3]v",
 		fieldNameURL, fromClause, havingClause,
 	)
@@ -325,7 +312,7 @@ func (qg *QueriesGen) GetExceptionsQuery(tenantID string) string {
 			COUNT(exceptionId) AS hitCountPerAsset,
 			SUM(COUNT(exceptionId))
 				OVER (
-					PARTITION BY k8sClusterId, exceptionId
+					PARTITION BY exceptionId
 					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 				) AS hitCountPerException
 		FROM ` + table + `,
@@ -333,8 +320,8 @@ func (qg *QueriesGen) GetExceptionsQuery(tenantID string) string {
 		WHERE
 			eventtime::timestamp > CURRENT_TIMESTAMP - INTERVAL '14 days'
 			AND exceptionId IS NOT NULL
-		GROUP BY k8sClusterId, exceptionId, assetid
-		ORDER BY k8sClusterId, exceptionId`)
+		GROUP BY exceptionId, assetid
+		ORDER BY exceptionId`)
 }
 
 //GetParamsForCollapsingFormat get params for tokenizer
@@ -344,7 +331,7 @@ func (qg *QueriesGen) GetParamsForCollapsingFormat(tenantID string) string {
 		" FROM %v WHERE eventname='Web Request' AND (practicesubtype='Web Application' or practicesubtype='Web API') "+
 		"AND eventtime::timestamp > CURRENT_TIMESTAMP - INTERVAL '7 days'"+
 		" AND matchedparameter is not null AND matchedlocation='body'"+
-		" GROUP BY k8sClusterId, assetid", models.FieldNameParams, table)
+		" GROUP BY assetid", models.FieldNameParams, table)
 }
 
 //GetUrlsForCollapsingFormat get urls for tokenizer
@@ -355,7 +342,7 @@ func (qg *QueriesGen) GetUrlsForCollapsingFormat(tenantID string) string {
 		"AND eventtime::timestamp > CURRENT_TIMESTAMP - INTERVAL '7 days'"+
 		" AND ((matchedparameter is null AND matchedlocation='body') OR matchedlocation='url')"+
 		" AND httpuripath is not null "+
-		" GROUP BY k8sClusterId, assetid", models.FieldNameURIs, table)
+		" GROUP BY assetid", models.FieldNameURIs, table)
 }
 
 //GetNumOfRequests query for total requests
@@ -368,7 +355,7 @@ func (qg *QueriesGen) GetNumOfRequests(tenantID string) string {
 		"'2021-01-01' "
 	internalQGroupBy := "GROUP BY eventtime, assetid, agentid, logindex"
 	internalQuery := fmt.Sprintf("%v %v %v %v", internalQSelect, internalQFrom, internalQWhere, internalQGroupBy)
-	return fmt.Sprintf("select sum(reservedngena) as %v FROM (%v) as requests",
+	return fmt.Sprintf("select '' as tenant_id, sum(reservedngena) as %v FROM (%v) as requests",
 		models.FieldNameCountAll, internalQuery)
 }
 
