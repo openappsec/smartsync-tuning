@@ -4,8 +4,8 @@ import (
 	"context"
 	"net"
 
-	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/log"
+	"openappsec.io/smartsync-tuning/models"
 )
 
 // Configuration defines the interface to get a configuration data
@@ -26,7 +26,6 @@ type Repository interface {
 type Mgmt interface {
 	AppendParameters(tenantID string, assetID string, tuningEvents []models.TuneEvent) error
 	RemoveParameters(tenantID string, assetID string, tuningEvents []models.TuneEvent) error
-	GetOverrides(tenantID string) (models.TenantsOverrides, error)
 	GetPolicyVersion(tenantID string) (int, error)
 }
 

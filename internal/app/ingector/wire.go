@@ -6,11 +6,11 @@ package ingector
 import (
 	"context"
 	"database/sql/driver"
+	"openappsec.io/smartsync-tuning/internal/pkg/policy"
 
 	"openappsec.io/smartsync-tuning/internal/app/drivers/crdlistener"
 	"openappsec.io/smartsync-tuning/internal/app/drivers/eventconsumer"
 	"openappsec.io/smartsync-tuning/internal/app/drivers/scheduler"
-	"openappsec.io/smartsync-tuning/internal/pkg/db/policy"
 	"openappsec.io/smartsync-tuning/internal/pkg/db/sharedstorage"
 	"openappsec.io/smartsync-tuning/internal/pkg/query/pg"
 

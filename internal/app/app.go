@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	appName = "fog-msrv-waap-tuning"
+	appName = "smartsync-tuning"
 
 	// configuration keys
 	logConfBaseKey       = "log"
@@ -79,7 +79,7 @@ type DBAdapter interface {
 	TearDown(ctx context.Context) error
 }
 
-//StandAlone available components for standalone
+// StandAlone available components for standalone
 type StandAlone struct {
 	httpDriver RestAdapter
 	conf       Configuration
@@ -88,7 +88,7 @@ type StandAlone struct {
 	scheduler  Scheduler
 }
 
-//Stop standalone app operation
+// Stop standalone app operation
 func (a *StandAlone) Stop(ctx context.Context) []error {
 	log.Debug("stop stand-alone drivers")
 	var stopErrs []error
@@ -157,7 +157,7 @@ func NewApp(
 	}
 }
 
-//Start standalone app operation
+// Start standalone app operation
 func (a *StandAlone) Start() error {
 	log.Debug("start stand-alone application")
 	if err := a.loggerInit(); err != nil {

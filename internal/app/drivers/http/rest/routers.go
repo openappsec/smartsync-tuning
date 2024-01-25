@@ -47,7 +47,6 @@ func (a *AdapterStandAlone) setRoutes(router *chi.Mux) *chi.Mux {
 			return middleware.HeaderToContext(next, "X-Tenant-Id", ctxutils.ContextKeyTenantID, false, "")
 		})
 		r.Use(middleware.Tracing)
-		//r.Use(middleware.CorrelationID("missing correlation ID"))
 		r.Post("/", a.HandleLog)
 		r.Post("/bulk", a.HandleLogsBulk)
 	})

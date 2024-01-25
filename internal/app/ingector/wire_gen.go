@@ -17,9 +17,9 @@ import (
 	rest2 "openappsec.io/smartsync-tuning/internal/app/drivers/http/rest"
 	"openappsec.io/smartsync-tuning/internal/app/drivers/scheduler"
 	"openappsec.io/smartsync-tuning/internal/app/tuningdomain/v2"
-	"openappsec.io/smartsync-tuning/internal/pkg/db/policy"
-	"openappsec.io/smartsync-tuning/internal/pkg/db/s3"
+	s3repository "openappsec.io/smartsync-tuning/internal/pkg/db/s3"
 	"openappsec.io/smartsync-tuning/internal/pkg/db/sharedstorage"
+	"openappsec.io/smartsync-tuning/internal/pkg/policy"
 	"openappsec.io/smartsync-tuning/internal/pkg/query"
 	"openappsec.io/smartsync-tuning/internal/pkg/query/pg"
 )
