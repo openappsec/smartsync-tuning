@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  timeout: "60s"
+  queryTimeout: "10s"
+  configurationServer: "" # configuration server can be either etcd or empty
+schemaValidator:
+  schemaFilePath: "api/tuningAPISchema.json"
+etcd:
+  hosts: "http://smartsync-server-svc"
+  timeout: "10s"
+  dir: "waapTuning"
+log:
+  level: "debug"
+tracer:
+  host: localhost:6831
+  enabled: false
+errors:
+  filepath: "configs/error-responses.json"
+  code: 108
+scheduler:
+  tuningInterval: "24h"
+  taskInterval: "60m"
+  tokenizerInterval: "24h"
+kubernetesListener:
+  period: "30s"
+rp:
+  baseUrl: "http://open-appsec-shared-storage-svc/api"
+  policyUrl: "http://policy"
+query:
+  warningThreshold: "5m"
+  db:
+    name_fmt: "postgres://my-release-postgresql.default.svc.cluster.local:5432/i2datatubeschemasecurityeventlogsv03?sslmode=disable"
+    root_fmt: "postgres://my-release-postgresql.default.svc.cluster.local:5432/?sslmode=disable"
+  schema:
+    # origin openappsec.io/fog-msrv-agents-logs-datatube/schemas/security-events-schema.json
+    path: "configs/tableSchema.json"
+tuning:
+  threshold:
+    minEventsCount: 50
+    minRatio: 10.0
+  filename: "tuning_decisions"
+policy:
+  path: "/etc/cp/conf/local_policy.yaml"
