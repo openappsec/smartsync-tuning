@@ -580,6 +580,9 @@ func (qa *Adapter) queryLogs(
 
 	for {
 		tenant := fmt.Sprint(row[indices[0]])
+		if len(tenant) == 0 {
+			tenant = "local"
+		}
 		var groupedByColumn string
 		if len(indices) > 2 {
 			exceptionAssetHashCombine := fnv.New32a()
