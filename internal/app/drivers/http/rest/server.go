@@ -27,6 +27,8 @@ const (
 	errorsFilePathKey = errorsConfBaseKey + ".filepath"
 	errorsCodeKey     = errorsConfBaseKey + ".code"
 
+	confKeyIntelligenceAssetTTL = "intel.ttl"
+
 	readySignal = "ready"
 )
 
@@ -62,14 +64,14 @@ type Server interface {
 	Shutdown(ctx context.Context) error
 }
 
-//AdapterBase base operation
+// AdapterBase base operation
 type AdapterBase struct {
 	server    Server
 	conf      Configuration
 	healthSvc HealthService
 }
 
-//AdapterStandAlone standalone server adapter
+// AdapterStandAlone standalone server adapter
 type AdapterStandAlone struct {
 	AdapterBase
 
@@ -141,7 +143,7 @@ func newAdapterBase(cs Configuration, hs HealthService) AdapterBase {
 	}
 }
 
-//NewAdapterStandAlone creates a standalone compatible adapter
+// NewAdapterStandAlone creates a standalone compatible adapter
 func NewAdapterStandAlone(cs Configuration,
 	hs HealthService,
 	ls StandaloneService) (*AdapterStandAlone, error) {

@@ -22,7 +22,7 @@ const (
 	msrvErrCode    = "116"
 )
 
-//Apps represents application
+// Apps represents application
 type Apps interface {
 	Start() error
 	Stop(ctx context.Context) []error
@@ -37,18 +37,13 @@ func main() {
 		os.Exit(exitCauseError)
 	}
 
-	isStandAloneMode := os.Getenv("MODE") == "stand-alone"
 	var app Apps
 
-	if isStandAloneMode {
-		isK8sEnv := os.Getenv("K8S_NAMESPACE") != ""
-		if isK8sEnv {
-			app, err = ingector.InitializeAppStandAlone(initCtx)
-		} else {
-			app, err = ingector.InitializeAppStandAloneDocker(initCtx)
-		}
+	isK8sEnv := os.Getenv("K8S_NAMESPACE") != ""
+	if isK8sEnv {
+		app, err = ingector.InitializeAppStandAlone(initCtx)
 	} else {
-		app, err = ingector.InitializeApp(initCtx)
+		app, err = ingector.InitializeAppStandAloneDocker(initCtx)
 	}
 	initCancel()
 	if err != nil {

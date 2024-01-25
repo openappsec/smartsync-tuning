@@ -85,7 +85,6 @@ func (a *Adapter) setRoutes(router *chi.Mux) *chi.Mux {
 			r.Use(middleware.CorrelationID("missing correlation ID"))
 			r.Use(middleware.TenantID("missing tenant ID"))
 			r.Get("/tenants/{tenantId}/tenant-report", a.GetTenantReport)
-			r.Post("/source/assets/query", a.PostQuery)
 		})
 	})
 
