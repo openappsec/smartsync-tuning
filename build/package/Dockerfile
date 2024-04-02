@@ -27,13 +27,16 @@ COPY --from=builder /go/bin/app /go/bin/app
 # Copy configuration files
 COPY --from=builder /app/configs/* ./configs/
 
+RUN apk add libcap
+RUN setcap CAP_NET_BIND_SERVICE=+eip /go/bin/app
+
 # Create appuser so as not to run as root
 RUN adduser -D -g '' appuser
 # Use an unprivileged user.
 USER appuser
 
 # Port on which the service will be exposed.
-EXPOSE 8080
+EXPOSE 80
 
 # Run the app binary.
 ENTRYPOINT ["/go/bin/app"]
