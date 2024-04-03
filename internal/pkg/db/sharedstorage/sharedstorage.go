@@ -13,18 +13,18 @@ import (
 	"net/url"
 	"time"
 
-	"openappsec.io/smartsync-tuning/models"
 	"openappsec.io/errors"
 	"openappsec.io/httputils/client"
 	"openappsec.io/log"
+	"openappsec.io/smartsync-tuning/models"
 )
 
 const (
 	traceClientTimeout = 2 * time.Minute
 
 	//conf Key Reverse Proxy
-	rp        = "rp"
-	rpBaseURL = rp + ".baseUrl"
+	sharedStorageKey     = "shared_storage"
+	sharedStorageHostKey = sharedStorageKey + ".host"
 )
 
 // Configuration exposes an interface of configuration related actions
@@ -32,13 +32,13 @@ type Configuration interface {
 	GetString(key string) (string, error)
 }
 
-//Adapter utilizes shared-storage service for doc like db
+// Adapter utilizes shared-storage service for doc like db
 type Adapter struct {
 	client *http.Client
 	host   string
 }
 
-//NewAdapter create new shared-storage adapter
+// NewAdapter create new shared-storage adapter
 func NewAdapter(conf Configuration) (*Adapter, error) {
 	a := &Adapter{}
 	err := a.initialize(conf)
@@ -50,10 +50,11 @@ func NewAdapter(conf Configuration) (*Adapter, error) {
 
 // initialize the adapter
 func (a *Adapter) initialize(conf Configuration) error {
-	baseURL, err := conf.GetString(rpBaseURL)
+	host, err := conf.GetString(sharedStorageHostKey)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get reverse proxy baseURL from %v", rpBaseURL)
+		return errors.Wrapf(err, "failed to get shared storage host from %v", sharedStorageHostKey)
 	}
+	baseURL := fmt.Sprintf("http://%s/api", host)
 	if _, err = url.Parse(baseURL); err != nil {
 		return errors.Wrapf(err, "failed to parse url: %v", baseURL)
 	}
@@ -64,7 +65,7 @@ func (a *Adapter) initialize(conf Configuration) error {
 	return nil
 }
 
-//ReportAsset push data of type reportedType of an asset
+// ReportAsset push data of type reportedType of an asset
 func (a *Adapter) ReportAsset(
 	ctx context.Context,
 	reportedType models.ReportedAssetType,
@@ -201,7 +202,7 @@ func genAssetHash(assetID string) string {
 	return fmt.Sprintf("%x", assetHash)
 }
 
-//GetAssetData get data of type reportedType of an asset
+// GetAssetData get data of type reportedType of an asset
 func (a *Adapter) GetAssetData(ctx context.Context, reportedType models.ReportedAssetType, tenantID string,
 	assetID string, out interface{}) error {
 	filePath := genFilePath(tenantID, assetID)
@@ -370,7 +371,7 @@ func extractFilesList(body []byte) ([]string, error) {
 	return ids, nil
 }
 
-//GetAllAssetsData not supported
+// GetAllAssetsData not supported
 func (a *Adapter) GetAllAssetsData(ctx context.Context, tenantID string) ([]models.Attributes, error) {
 	req, err := http.NewRequest(http.MethodGet, a.host+"/?list-type=2&prefix=svc/",
 		nil)
@@ -416,7 +417,7 @@ func isAssetContained(assetID string, assets []models.AssetDetails) bool {
 	return false
 }
 
-//PruneAssets not supported
+// PruneAssets not supported
 func (a *Adapter) PruneAssets(ctx context.Context, assets []models.AssetDetails, _ int64) error {
 	log.WithContext(ctx).Debugf("pruning assets")
 	if len(assets) == 0 {
@@ -439,8 +440,8 @@ func (a *Adapter) PruneAssets(ctx context.Context, assets []models.AssetDetails,
 	return nil
 }
 
-//DeleteAllAssetsOfTenant not supported
-func (Adapter) DeleteAllAssetsOfTenant(ctx context.Context, tenantID string) error {
+// DeleteAllAssetsOfTenant not supported
+func (*Adapter) DeleteAllAssetsOfTenant(context.Context, string) error {
 	return errors.New("not supported")
 }
 

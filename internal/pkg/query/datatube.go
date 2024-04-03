@@ -20,16 +20,16 @@ import (
 )
 
 const (
-	confKeyWaapFullDatasetID             = "DATATUBE_WAAP_DATASET_ID"
-	confKeyElpisLogsTenant               = "ELPIS_LOGS_TENANT"
 	confKeyQuery                         = "query"
 	confKeyQueryDurationWarningThreshold = confKeyQuery + ".warningThreshold"
 	confKeyQueryDB                       = confKeyQuery + ".db"
-	confKeyQueryDBNameFmt                = confKeyQueryDB + ".name_fmt"
-	confKeyQueryDBRootFmt                = confKeyQueryDB + ".root_fmt"
+	confKeyQueryDBHost                   = confKeyQueryDB + ".host"
+	confKeyQueryDBPort                   = confKeyQueryDB + ".port"
+	confKeyQueryDBUser                   = confKeyQueryDB + ".user"
+	confKeyQueryDBSSLMode                = confKeyQueryDB + ".sslmode"
+	confKeyQueryDBPass                   = confKeyQueryDB + ".password"
 
-	confKeyQueryDBPass = "db.password"
-	maxRetries         = 3
+	maxRetries = 3
 )
 
 // Field names for smartview queries
@@ -94,7 +94,17 @@ type Configuration interface {
 
 // NewAdapter creates an empty new adapter
 func NewAdapter(ctx context.Context, c Configuration, g GenQueries, driver driver.Driver) (*Adapter, error) {
-	dbName, err := c.GetString(confKeyQueryDBNameFmt)
+	dbHost, err := c.GetString(confKeyQueryDBHost)
+	if err != nil {
+		return nil, err
+	}
+
+	dbPort, err := c.GetString(confKeyQueryDBPort)
+	if err != nil {
+		return nil, err
+	}
+
+	dbUser, err := c.GetString(confKeyQueryDBUser)
 	if err != nil {
 		return nil, err
 	}
@@ -104,9 +114,13 @@ func NewAdapter(ctx context.Context, c Configuration, g GenQueries, driver drive
 		return nil, err
 	}
 
-	if len(pass) > 0 {
-		dbName = fmt.Sprintf(dbName, pass)
+	sslMode, err := c.GetString(confKeyQueryDBSSLMode)
+	if err != nil {
+		return nil, err
 	}
+
+	dbName := fmt.Sprintf("postgres://%s:%s@%s:%v/i2datatubeschemasecurityeventlogsv03?sslmode=%s",
+		dbUser, pass, dbHost, dbPort, sslMode)
 
 	log.WithContext(ctx).Infof("db name: %s", dbName)
 
@@ -829,19 +843,32 @@ func (qa *Adapter) createTable(ctx context.Context, conn driver.Conn, message *m
 func (qa *Adapter) createDB(ctx context.Context) error {
 	stmt := qa.genQuery.CreateDatabase()
 
+	dbHost, err := qa.config.GetString(confKeyQueryDBHost)
+	if err != nil {
+		return err
+	}
+
+	dbPort, err := c.GetString(confKeyQueryDBPort)
+	if err != nil {
+		return err
+	}
+
+	dbUser, err := qa.config.GetString(confKeyQueryDBUser)
+	if err != nil {
+		return err
+	}
+
 	pass, err := qa.config.GetString(confKeyQueryDBPass)
 	if err != nil {
 		return err
 	}
 
-	rootConn, err := qa.config.GetString(confKeyQueryDBRootFmt)
+	sslMode, err := qa.config.GetString(confKeyQueryDBSSLMode)
 	if err != nil {
-		return errors.Wrap(err, "failed to get root connection path")
+		return err
 	}
 
-	if len(pass) > 0 {
-		rootConn = fmt.Sprintf(rootConn, pass)
-	}
+	rootConn := fmt.Sprintf("postgres://%s:%s@$%s:%v/?sslmode=%s", dbUser, pass, dbHost, dbPort, sslMode)
 
 	conn, err := qa.driver.Open(rootConn)
 	if err != nil {
