@@ -24,6 +24,7 @@ const (
 	confKeyQueryDurationWarningThreshold = confKeyQuery + ".warningThreshold"
 	confKeyQueryDB                       = confKeyQuery + ".db"
 	confKeyQueryDBHost                   = confKeyQueryDB + ".host"
+	confKeyQueryDBPort                   = confKeyQueryDB + ".port"
 	confKeyQueryDBUser                   = confKeyQueryDB + ".user"
 	confKeyQueryDBSSLMode                = confKeyQueryDB + ".sslmode"
 	confKeyQueryDBPass                   = confKeyQueryDB + ".password"
@@ -98,6 +99,11 @@ func NewAdapter(ctx context.Context, c Configuration, g GenQueries, driver drive
 		return nil, err
 	}
 
+	dbPort, err := c.GetString(confKeyQueryDBPort)
+	if err != nil {
+		return nil, err
+	}
+
 	dbUser, err := c.GetString(confKeyQueryDBUser)
 	if err != nil {
 		return nil, err
@@ -113,8 +119,8 @@ func NewAdapter(ctx context.Context, c Configuration, g GenQueries, driver drive
 		return nil, err
 	}
 
-	dbName := fmt.Sprintf("postgres://%s:%s@%s:5432/i2datatubeschemasecurityeventlogsv03?sslmode=%s",
-		dbUser, pass, dbHost, sslMode)
+	dbName := fmt.Sprintf("postgres://%s:%s@%s:%v/i2datatubeschemasecurityeventlogsv03?sslmode=%s",
+		dbUser, pass, dbHost, dbPort, sslMode)
 
 	log.WithContext(ctx).Infof("db name: %s", dbName)
 
@@ -842,6 +848,11 @@ func (qa *Adapter) createDB(ctx context.Context) error {
 		return err
 	}
 
+	dbPort, err := c.GetString(confKeyQueryDBPort)
+	if err != nil {
+		return err
+	}
+
 	dbUser, err := qa.config.GetString(confKeyQueryDBUser)
 	if err != nil {
 		return err
@@ -857,7 +868,7 @@ func (qa *Adapter) createDB(ctx context.Context) error {
 		return err
 	}
 
-	rootConn := fmt.Sprintf("postgres://%s:%s@$%s:5432/?sslmode=%s", dbUser, pass, dbHost, sslMode)
+	rootConn := fmt.Sprintf("postgres://%s:%s@$%s:%v/?sslmode=%s", dbUser, pass, dbHost, dbPort, sslMode)
 
 	conn, err := qa.driver.Open(rootConn)
 	if err != nil {

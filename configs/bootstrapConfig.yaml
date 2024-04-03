@@ -30,11 +30,10 @@ query:
   warningThreshold: "5m"
   db:
     host: "db"
+    port: "5432"
     user: "postgres"
     password: "pass"
     sslmode: "disable"
-    name_fmt: "postgres://my-release-postgresql.default.svc.cluster.local:5432/i2datatubeschemasecurityeventlogsv03?sslmode=disable"
-    root_fmt: "postgres://my-release-postgresql.default.svc.cluster.local:5432/?sslmode=disable"
   schema:
     # origin openappsec.io/fog-msrv-agents-logs-datatube/schemas/security-events-schema.json
     path: "configs/tableSchema.json"
