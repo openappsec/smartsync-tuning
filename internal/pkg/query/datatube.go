@@ -848,7 +848,7 @@ func (qa *Adapter) createDB(ctx context.Context) error {
 		return err
 	}
 
-	dbPort, err := c.GetString(confKeyQueryDBPort)
+	dbPort, err := qa.config.GetString(confKeyQueryDBPort)
 	if err != nil {
 		return err
 	}
