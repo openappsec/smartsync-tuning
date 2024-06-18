@@ -33,6 +33,8 @@ const (
 	rp                     = "rp"
 	rpBaseURL              = rp + ".baseUrl"
 	rpPolicyURL            = rp + ".policyUrl"
+	sharedStorageKey       = "shared_storage"
+	sharedStorageHostKey   = sharedStorageKey + ".host"
 	tenantIDHeader         = "x-tenant-id"
 	headerKeyTraceID       = "X-Trace-Id"
 	headerKeyCorrelationID = "X-Correlation-Id"
@@ -67,7 +69,11 @@ func NewAdapter(c Configuration) (*Adapter, error) {
 
 // initialize the adapter
 func (a *Adapter) initialize() error {
-	baseURL, err := a.conf.GetString(rpBaseURL)
+	baseURL, _ := a.conf.GetString(rpBaseURL)
+	sharedHost, err := a.conf.GetString(sharedStorageHostKey)
+	if err == nil && len(sharedHost) > 0 {
+		baseURL = fmt.Sprintf("http://%s/api", sharedHost)
+	}
 	policyURL, err := a.conf.GetString(rpPolicyURL)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get reverse proxy baseURL from %v", rpBaseURL)
@@ -172,7 +178,7 @@ func setTenantIDHeader(req *http.Request, tenantID string) {
 	req.Header.Add(tenantIDHeader, tenantID)
 }
 
-//decompressIfNeeded - decompress when not json is unreadable as plain text
+// decompressIfNeeded - decompress when not json is unreadable as plain text
 func (a *Adapter) decompressIfNeeded(ctx context.Context, data []byte) ([]byte, bool, error) {
 	//might be compressed
 	if !json.Valid(data) {
