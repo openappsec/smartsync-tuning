@@ -746,7 +746,7 @@ func (qa *Adapter) InsertLog(ctx context.Context, message *models.AgentMessage) 
 	if err != nil {
 		errCreateDB := qa.createDB(ctx)
 		if errCreateDB != nil {
-			log.WithContext(ctx).Warnf("failed to create db, err: %v", err)
+			log.WithContext(ctx).Warnf("failed to create db, err: %v", errCreateDB)
 			return errors.Wrap(err, "failed to open connection to DB")
 		}
 		conn, err = qa.driver.Open(qa.dbName)
@@ -868,7 +868,7 @@ func (qa *Adapter) createDB(ctx context.Context) error {
 		return err
 	}
 
-	rootConn := fmt.Sprintf("postgres://%s:%s@$%s:%v/?sslmode=%s", dbUser, pass, dbHost, dbPort, sslMode)
+	rootConn := fmt.Sprintf("postgres://%s:%s@%s:%v/?sslmode=%s", dbUser, pass, dbHost, dbPort, sslMode)
 
 	conn, err := qa.driver.Open(rootConn)
 	if err != nil {
